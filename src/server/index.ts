@@ -77,7 +77,7 @@ app.get("/", (_req, res) => {
       const fileInput = document.getElementById('file');
       if (!fileInput.files.length) return;
       btn.disabled = true;
-      status.textContent = 'Redacting…';
+      status.textContent = 'Redacting… large documents (100+ pages) can take up to 1–2 minutes on this hosting tier — please keep this tab open.';
       const fd = new FormData();
       fd.append('file', fileInput.files[0]);
       try {
