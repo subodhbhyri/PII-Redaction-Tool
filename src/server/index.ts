@@ -3,6 +3,19 @@ import multer from "multer";
 import { redactDocx } from "../docx/process";
 
 const app = express();
+
+app.use((req, _res, next) => {
+  console.log(`[http] ${req.method} ${req.path}`);
+  next();
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("[unhandledRejection]", err);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", err);
+});
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
@@ -98,16 +111,21 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.post("/redact", upload.single("file"), async (req, res) => {
   if (!req.file) {
+    console.log("[redact] rejected: no file / wrong type");
     res.status(400).send("No file uploaded, or the file wasn't a .docx (expected field name 'file').");
     return;
   }
+  const startedAt = Date.now();
+  console.log(`[redact] start: ${req.file.originalname} (${req.file.size} bytes)`);
   try {
     const { buffer, records } = await redactDocx(req.file.buffer);
+    const elapsedMs = Date.now() - startedAt;
     const summary: Record<string, number> = {};
     for (const r of records) summary[r.type] = (summary[r.type] ?? 0) + 1;
     const summaryText = `Redacted ${records.length} instances: ${Object.entries(summary)
       .map(([k, v]) => `${k} ${v}`)
       .join(", ")}`;
+    console.log(`[redact] done in ${elapsedMs}ms: ${summaryText}`);
 
     res.setHeader(
       "Content-Type",
@@ -117,7 +135,8 @@ app.post("/redact", upload.single("file"), async (req, res) => {
     res.setHeader("X-Redaction-Summary", summaryText);
     res.send(buffer);
   } catch (err) {
-    console.error(err);
+    const elapsedMs = Date.now() - startedAt;
+    console.error(`[redact] failed after ${elapsedMs}ms:`, err);
     res.status(500).send("Failed to process document: " + (err as Error).message);
   }
 });
