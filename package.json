@@ -1,0 +1,38 @@
+{
+  "name": "pii-redaction-tool",
+  "version": "1.0.0",
+  "description": "Detects and redacts PII in .docx documents, replacing it with consistent fake values.",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server/index.js",
+    "dev": "ts-node src/server/index.ts",
+    "redact": "ts-node src/cli/redact.ts",
+    "evaluate": "ts-node eval/evaluate.ts",
+    "test": "ts-node eval/evaluate.ts"
+  },
+  "keywords": [
+    "pii",
+    "redaction",
+    "docx"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "compromise": "^14.17.0",
+    "express": "^5.2.1",
+    "jszip": "^3.10.2",
+    "multer": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^22.20.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
